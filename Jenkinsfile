@@ -55,10 +55,18 @@ pipeline {
                 sh '''
                 docker network create employee-network || true
 
-                docker network connect employee-network ems-mysql || true
-
+                docker rm -f ems-mysql || true
                 docker rm -f backend || true
                 docker rm -f frontend || true
+
+                docker run -d --name ems-mysql \
+                  --network employee-network \
+                  -e MYSQL_ROOT_PASSWORD=root \
+                  -e MYSQL_DATABASE=ems \
+                  mysql:8
+
+                echo "Waiting for MySQL to be ready..."
+                sleep 30
 
                 docker run -d --name backend \
                   --network employee-network \
